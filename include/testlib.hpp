@@ -83,7 +83,7 @@ namespace testlib {
 
     //get duration string
     template <class T> std::string duration_string(const T& start, const T& end) {
-        return " \u001b[34m[" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()) + " ms]\u001b[0m";
+        return " \u001b[34;1m[" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()) + " ms]\u001b[0m";
     }
 
 
@@ -105,14 +105,14 @@ namespace testlib {
         }
         catch (const test_error& ex) {
             const auto end = std::chrono::high_resolution_clock::now();
-            std::cout << dots(title) << "\u001b[31mERROR\u001b[0m" << duration_string(start, end) << std::endl;
+            std::cout << dots(title) << "\u001b[31;1mERROR\u001b[0m" << duration_string(start, end) << std::endl;
             std::cout << "    " << "\u001b[33m" << "File " << ex.file() << ", line " << ex.line() << ":" << "\u001b[0m" << std::endl;
             std::cout << "    " << "\u001b[33m" << ex.what() << "\u001b[0m" << std::endl;
             return;
         }
 
         const auto end = std::chrono::high_resolution_clock::now();
-        std::cout << dots(title) << "\u001b[32mOK\u001b[0m" << duration_string(start, end) << std::endl;
+        std::cout << dots(title) << "\u001b[32;1mOK\u001b[0m" << duration_string(start, end) << std::endl;
     }
 
 

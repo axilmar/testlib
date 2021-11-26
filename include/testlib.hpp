@@ -65,6 +65,7 @@ namespace testlib {
         GetConsoleMode(console_handle, &mode);
         SetConsoleMode(console_handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         #endif
+        test_error_count = 0;
     }
 
 

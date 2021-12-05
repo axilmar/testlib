@@ -55,16 +55,18 @@ namespace testlib {
     };
 
 
+    inline size_t test_row_length = 80;
     inline size_t test_error_count = 0;
 
 
-    inline void init() {
+    inline void init(size_t test_row_length_param = 80) {
         #ifdef _WIN32
         HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
         DWORD mode;
         GetConsoleMode(console_handle, &mode);
         SetConsoleMode(console_handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         #endif
+        test_row_length_param = test_row_length;
         test_error_count = 0;
     }
 
@@ -90,8 +92,7 @@ namespace testlib {
     //execute test
     template <class F> void test(const char* name, F&& proc) {
         static const auto dots = [](const std::string& s) {
-            const size_t base = 50;
-            const size_t count = s.size() < base ? base - s.size() : 5;
+            const size_t count = s.size() < test_row_length ? test_row_length - s.size() : 5;
             return " \u001b[36m" + std::string(count - 2, '.') + "\u001b[0m ";
         };
 

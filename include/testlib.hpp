@@ -117,6 +117,12 @@ namespace testlib {
     }
 
 
+    //execute test with std string as name.
+    template <class F> void test(const std::string& name, F&& proc) {
+        test(name.c_str(), std::forward<F>(proc));
+    }
+
+
 } //namespace testlib
 
 

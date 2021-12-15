@@ -6,6 +6,10 @@
 #include <stdexcept>
 #include <chrono>
 #include <iostream>
+#include <atomic>
+#include <mutex>
+#include <deque>
+#include <utility>
 
 
 #ifdef _WIN32
@@ -15,8 +19,14 @@
 
 #define check(cond) {\
     if (!(cond)) {\
-        ++testlib::test_error_count;\
-        throw testlib::test_error(__FILE__, __LINE__, #cond);\
+        if (test_thread) {\
+            ++testlib::test_error_count;\
+            throw testlib::test_error(__FILE__, __LINE__, #cond);\
+        }\
+        else {\
+            std::lock_guard lock(test_error_queue_mutex);\
+            test_error_queue.emplace_back(__FILE__, __LINE__, #cond);\
+        }\
     }\
 }
 
@@ -56,7 +66,10 @@ namespace testlib {
 
 
     inline size_t test_row_length = 80;
-    inline size_t test_error_count = 0;
+    inline std::atomic<size_t> test_error_count = 0;
+    inline thread_local bool test_thread = false;
+    inline std::mutex test_error_queue_mutex;
+    inline std::deque<std::tuple<const char*, int, std::string>> test_error_queue;
 
 
     inline void init(size_t test_row_length_param = 80) {
@@ -91,6 +104,7 @@ namespace testlib {
 
     //execute test
     template <class F> void test(const char* name, F&& proc) {
+        test_thread = true;
         static const auto dots = [](const std::string& s) {
             const size_t count = s.size() < test_row_length ? test_row_length - s.size() : 5;
             return " \u001b[36m" + std::string(count - 2, '.') + "\u001b[0m ";
@@ -102,7 +116,18 @@ namespace testlib {
         const auto start = std::chrono::high_resolution_clock::now();
 
         try {
+            {
+                std::lock_guard lock(test_error_queue_mutex);
+                test_error_queue.clear();
+            }
             proc();
+            {
+                std::lock_guard lock(test_error_queue_mutex);
+                if (!test_error_queue.empty()) {
+                    const auto& first_error = test_error_queue.front();
+                    throw test_error(std::get<0>(first_error), std::get<1>(first_error), std::get<2>(first_error));
+                }
+            }
         }
         catch (const test_error& ex) {
             const auto end = std::chrono::high_resolution_clock::now();

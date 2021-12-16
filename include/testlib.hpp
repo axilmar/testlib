@@ -132,7 +132,7 @@ namespace testlib {
 
         else {
             std::cout << dots(title) << "\u001b[31;1m" << (get_globals().test_error_queue.size() > 1 ? "ERRORS" : "ERROR") << "\u001b[0m" << duration_string(start, end) << std::endl;
-            size_t index = 0;
+            size_t index = 1;
             for (const auto& error : get_globals().test_error_queue) {
                 std::cout << std::setw(3) << index << ") \u001b[33m" << "File " << std::get<0>(error) << ", line " << std::get<1>(error) << ":" << "\u001b[0m" << std::endl;
                 std::cout << "     " << "\u001b[33m" << std::get<2>(error) << "\u001b[0m" << std::endl;

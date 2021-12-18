@@ -19,10 +19,15 @@
 
 
 #define check(cond) {\
-    if (!(cond)) {\
-        ++testlib::get_globals().test_error_count;\
-        std::lock_guard lock(testlib::get_globals().test_error_queue_mutex);\
-        testlib::get_globals().test_error_queue.emplace_back(__FILE__, __LINE__, #cond);\
+    try {\
+        if (!(cond)) {\
+            ++testlib::get_globals().test_error_count;\
+            std::lock_guard lock(testlib::get_globals().test_error_queue_mutex);\
+            testlib::get_globals().test_error_queue.emplace_back(__FILE__, __LINE__, #cond);\
+        }\
+    }\
+    catch (const std::exception& ex) {\
+        testlib::get_globals().test_error_queue.emplace_back(__FILE__, __LINE__, #cond + std::string(": \u001b[33;1mEXCEPTION:\u001b[0m\u001b[33m  ") + ex.what());\
     }\
 }
 
@@ -49,7 +54,7 @@
 #define fail_test_with_exception(ex) {\
         ++testlib::get_globals().test_error_count;\
         std::lock_guard lock(testlib::get_globals().test_error_queue_mutex);\
-        testlib::get_globals().test_error_queue.emplace_back(__FILE__, __LINE__, std::string("\u001b[33;1mException:\u001b[0m\u001b[33m ") + ex.what());\
+        testlib::get_globals().test_error_queue.emplace_back(__FILE__, __LINE__, std::string("\u001b[33;1mEXCEPTION:\u001b[0m\u001b[33m ") + ex.what());\
     }
 
 
